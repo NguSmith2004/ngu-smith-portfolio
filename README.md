@@ -29,9 +29,24 @@ The language switcher translates **UI chrome**: navigation, buttons, page titles
 
 ## Changelog — this update
 
-- **Fixed the theme-switch flash.** Toggling light/dark now crossfades smoothly instead of snapping — the previous instant, untransitioned background change on the hero and page headers was what read as a "sparkle" of white light.
-- **Project links are now real and per-project.** Each project's detail popup shows the actual relevant links instead of one generic profile link:
-  - **SmithGo Express** — "View on GitHub" and "Open live site" (`smithgo-express.netlify.app`)
-  - **Inventory Management, Online Marketplace, Digital Queue Management, Employee Management** — "View on GitHub" (general profile, since these don't have confirmed individual repo URLs yet — send me real ones and I'll wire each to its own link)
-  - **Graphic Design Work** — an honest "gallery coming soon" note instead of a fake link, since this one's waiting on real design pieces
-- **Services page rebuilt as a two-sided split** — "Engineering & Web" and "Graphic Design" as genuinely distinct panels (different accent color, icon language, and content structure per side) rather than one uniform grid of identical cards, joined by a center seam. The Graphic Design side currently shows an honestly-labeled empty state for your upcoming design work — swap it out once you have real pieces to show (see `.design-empty` in `services.html`, and drop images into a `.design-panel` gallery the same way `certificates.html` does).
+- **Certificates page rebuilt with your real documents**, organized into three sections:
+  - **Academic** — HND Success Testimonial/Transcript, GCE Advanced Level Certificate, Attestation of Completion of Study, and School Attendance Certificate (all from your uploaded PDFs, cleaned up and cropped for a proper presentation)
+  - **Professional** — DobreTech internship completion certificate, and your Open Dreams Graduate Summit certificate of participation paired with your photo from the event
+  - **CV** — your actual CV, with a preview thumbnail that opens the real PDF, plus a working download button
+- **Two documents were deliberately left out**, and I want to be upfront about why rather than silently skip them: your national ID card scan and your Nestlé/EAS employment contract both contain sensitive personal data (full ID number, signatures, and in the contract's case, phone numbers and salary) that shouldn't go on a public website. If you need a way to prove identity/employment to someone specific, that's better done privately (email, a password-protected share) than on a public portfolio page.
+- The photographed certificates (which were shot on a fabric background) have been cropped to just the document itself for a clean, professional look.
+
+## Fixed the theme-switch flash
+
+Toggling light/dark now crossfades smoothly instead of snapping — the previous instant, untransitioned background change on the hero and page headers was what read as a "sparkle" of white light.
+
+## Project links
+
+The project detail modal on the Portfolio page shows real per-project links:
+- **SmithGo Express** — "View on GitHub" and "Open live site" (`smithgo-express.netlify.app`)
+- **Inventory Management, Online Marketplace, Digital Queue Management, Employee Management** — "View on GitHub" (general profile — send me real individual repo URLs and I'll wire each one specifically)
+- **Graphic Design Work** — an honest "gallery coming soon" note instead of a fake link
+
+## Services page
+
+Rebuilt as a two-sided split — "Engineering & Web" and "Graphic Design" — each with its own accent color and content structure rather than one uniform grid of identical cards. The Graphic Design side has an honestly-labeled empty state ready for you to swap in real design pieces once you have them.
