@@ -33,3 +33,122 @@ $$('.magnetic').forEach(b=>b.addEventListener('pointermove',e=>{const r=b.getBou
 // Custom cursor on desktop
 if(matchMedia('(pointer:fine)').matches){const d=document.createElement('div'),r=document.createElement('div');d.className='cursor-dot';r.className='cursor-ring';document.body.append(d,r);addEventListener('pointermove',e=>{d.style.opacity=r.style.opacity='1';d.style.left=r.style.left=e.clientX+'px';d.style.top=r.style.top=e.clientY+'px'});$$('a,button,.project-card').forEach(el=>{el.addEventListener('mouseenter',()=>r.classList.add('active'));el.addEventListener('mouseleave',()=>r.classList.remove('active'))})}
 })();
+/* ===== Theme (light/dark) + language switcher + clickable project/certificate cards ===== */
+(() => {"use strict";
+const $=(s,c=document)=>c.querySelector(s), $$=(s,c=document)=>[...c.querySelectorAll(s)];
+
+/* --- Theme toggle --- */
+const THEME_KEY='sg_theme';
+const applyTheme=(mode)=>{
+  document.documentElement.setAttribute('data-theme',mode);
+  $$('.theme-toggle').forEach(btn=>{btn.innerHTML=mode==='dark'?'<i class="bi bi-sun"></i>':'<i class="bi bi-moon-stars"></i>';btn.setAttribute('aria-label',mode==='dark'?'Switch to light mode':'Switch to dark mode')});
+};
+const storedTheme=localStorage.getItem(THEME_KEY);
+const prefersDark=matchMedia('(prefers-color-scheme: dark)').matches;
+applyTheme(storedTheme||(prefersDark?'dark':'light'));
+$$('.theme-toggle').forEach(btn=>btn.addEventListener('click',()=>{
+  const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  applyTheme(next); localStorage.setItem(THEME_KEY,next);
+}));
+
+/* --- Language switcher --- */
+const LANG_KEY='sg_lang';
+const langs = window.SG_LANGS||[]; const dict = window.SG_I18N||{};
+const langSwitchers = $$('.lang-switcher');
+
+function buildLangMenu(container){
+  const menu = container.querySelector('.lang-menu'); if(!menu) return;
+  menu.innerHTML='';
+  langs.forEach(l=>{
+    const b=document.createElement('button');
+    b.type='button'; b.dataset.lang=l.code;
+    b.innerHTML=`<span>${l.native}</span>`;
+    b.addEventListener('click',()=>{setLang(l.code); container.classList.remove('open')});
+    menu.appendChild(b);
+  });
+}
+langSwitchers.forEach(buildLangMenu);
+
+function setLang(code){
+  const strings = dict[code]||dict.en; if(!strings) return;
+  const langMeta = langs.find(l=>l.code===code)||langs[0];
+  document.documentElement.setAttribute('lang',code);
+  document.documentElement.setAttribute('dir',langMeta?.dir||'ltr');
+  $$('[data-i18n]').forEach(el=>{
+    const key=el.dataset.i18n; if(strings[key]) el.textContent=strings[key];
+  });
+  $$('[data-i18n-placeholder]').forEach(el=>{
+    const key=el.dataset.i18nPlaceholder; if(strings[key]) el.setAttribute('placeholder',strings[key]);
+  });
+  $$('.lang-toggle-btn .lang-current').forEach(el=>el.textContent=langMeta?.code.toUpperCase()||'EN');
+  $$('.lang-menu button').forEach(b=>b.classList.toggle('active', b.dataset.lang===code));
+  localStorage.setItem(LANG_KEY,code);
+}
+langSwitchers.forEach(sw=>{
+  const trigger = sw.querySelector('.lang-toggle-btn');
+  trigger?.addEventListener('click',(e)=>{e.stopPropagation(); sw.classList.toggle('open')});
+});
+document.addEventListener('click',()=>langSwitchers.forEach(sw=>sw.classList.remove('open')));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')langSwitchers.forEach(sw=>sw.classList.remove('open'))});
+setLang(localStorage.getItem(LANG_KEY)||'en');
+
+/* --- Project detail modal (Portfolio page) ---
+   Honest content only: no invented GitHub repo links or fake live-demo
+   URLs per project. Links out to the real GitHub profile instead, since
+   these are practice/concept projects without confirmed individual
+   public repos or deployed URLs. */
+const PROJECT_DETAILS = {
+  inventory:{title:"Inventory Management System",category:"Systems",tags:["React","FastAPI","PostgreSQL"],
+    desc:"A modern system concept for managing products, stock, customers and role-based operations — covering product catalogues, stock levels, customer records and permission-based access for different staff roles.",
+    links:[{type:"github",url:"https://github.com/ngusmith2004",label:"View on GitHub"}]},
+  smithgo:{title:"SmithGo Express",category:"Web",tags:["Web","UX","MERN"],
+    desc:"A service-oriented travel booking web product (MongoDB/Express/React/Node) focused on clear booking flows, account management and accessible information architecture for both customers and travel agencies.",
+    links:[{type:"github",url:"https://github.com/ngusmith2004",label:"View on GitHub"},{type:"live",url:"https://smithgo-express.netlify.app",label:"Open live site"}]},
+  marketplace:{title:"Online Marketplace",category:"Web",tags:["Marketplace","Frontend"],
+    desc:"An e-commerce style project exploring product discovery, catalogue organization, search/filtering and everyday user interactions of a marketplace experience.",
+    links:[{type:"github",url:"https://github.com/ngusmith2004",label:"View on GitHub"}]},
+  queue:{title:"Digital Queue Management",category:"Systems",tags:["System","Workflow"],
+    desc:"A practical system concept for organizing queues digitally — reducing wait-time friction and giving staff a clearer live view of service flow.",
+    links:[{type:"github",url:"https://github.com/ngusmith2004",label:"View on GitHub"}]},
+  employee:{title:"Employee Management System",category:"Systems",tags:["Software","Database"],
+    desc:"A structured management application concept for employee records, roles and everyday administrative workflows within an organization.",
+    links:[{type:"github",url:"https://github.com/ngusmith2004",label:"View on GitHub"}]},
+  design:{title:"Graphic Design Work",category:"Design",tags:["Design","Creative"],
+    desc:"Branding, poster and visual design experiments that run alongside my engineering work — exploring layout, colour and visual identity.",
+    links:[],pending:"Gallery coming soon — real design pieces are being added here."}
+};
+const modalEl = $('#projectModal');
+if(modalEl && window.bootstrap){
+  const bsModal = new bootstrap.Modal(modalEl);
+  $$('.project-card[data-project]').forEach(card=>{
+    card.setAttribute('role','button'); card.setAttribute('tabindex','0');
+    const open=()=>{
+      const key=card.dataset.project, p=PROJECT_DETAILS[key]; if(!p) return;
+      $('#projectModalTitle',modalEl).textContent=p.title;
+      $('#projectModalCategory',modalEl).textContent=p.category;
+      $('#projectModalDesc',modalEl).textContent=p.desc;
+      const tagWrap=$('#projectModalTags',modalEl); tagWrap.innerHTML='';
+      p.tags.forEach(t=>{const s=document.createElement('span'); s.className='tag'; s.textContent=t; tagWrap.appendChild(s)});
+      const linksWrap=$('#projectModalLinks',modalEl); linksWrap.innerHTML='';
+      if(p.links && p.links.length){
+        p.links.forEach(l=>{
+          const a=document.createElement('a');
+          a.href=l.url; a.target='_blank'; a.rel='noopener';
+          a.className='mini-cta magnetic mt-3 me-2';
+          const icon=l.type==='live'?'bi-box-arrow-up-right':'bi-github';
+          a.innerHTML=`<i class="bi ${icon}"></i> ${l.label}`;
+          linksWrap.appendChild(a);
+        });
+      } else if(p.pending){
+        const note=document.createElement('p');
+        note.className='small text-muted mt-3 mb-0 pending-note';
+        note.innerHTML=`<i class="bi bi-hourglass-split"></i> ${p.pending}`;
+        linksWrap.appendChild(note);
+      }
+      bsModal.show();
+    };
+    card.addEventListener('click',open);
+    card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}});
+  });
+}
+})();
